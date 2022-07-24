@@ -3,11 +3,12 @@ package com.chan.domain;
 import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Entity
-@Getter
+@Getter @NoArgsConstructor
 public class Center {
 
     @Id @GeneratedValue
