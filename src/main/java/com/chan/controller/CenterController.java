@@ -5,9 +5,14 @@ import com.chan.common.StatusEnum;
 import com.chan.domain.Center;
 import com.chan.dto.CenterRequestDto;
 import com.chan.dto.CenterResponseDto;
+import com.chan.exception.CenterValidationFailedException;
+import com.chan.exception.InvoiceRequestValidationFailedException;
 import com.chan.service.CenterService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -18,6 +23,8 @@ import javax.validation.Valid;
 public class CenterController {
 
     private final CenterService centerService;
+
+    private final ObjectMapper objectMapper;
 
     @GetMapping("/{localCode}")
     public ResponseEntity<Message> findCenter(@PathVariable String localCode){
@@ -34,9 +41,13 @@ public class CenterController {
     }
 
     @PostMapping
-    public ResponseEntity<Message> addCenter(@RequestBody @Valid CenterRequestDto centerRequestDto){
+    public ResponseEntity<Message> addCenter(@RequestBody @Valid CenterRequestDto centerRequestDto, Errors errors) throws JsonProcessingException {
 
         Message message = new Message();
+
+        if (errors.hasErrors()) {
+            throw new CenterValidationFailedException(objectMapper.writeValueAsString(errors));
+        }
 
         Center center = centerService.addCenter(centerRequestDto.toEntity());
 

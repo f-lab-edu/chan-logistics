@@ -1,0 +1,19 @@
+{
+  "centerList": [
+    {
+      "sigunguCode" : 1111110,
+      "localCode" : "A01",
+      "address" : "서울시 종로구"
+    },
+    {
+      "sigunguCode" : 1111140,
+      "localCode" : "A01",
+      "address" : "서울시 중구"
+    },
+    {
+      "sigunguCode" : 1111170,
+      "localCode" : "B01",
+      "address" : "서울시 용산구"
+    }
+  ]
+}
