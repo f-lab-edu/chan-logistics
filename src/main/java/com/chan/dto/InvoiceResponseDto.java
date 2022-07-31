@@ -32,7 +32,7 @@ public class InvoiceResponseDto {
         this.orderId = invoice.getOrderId();
         this.invoiceCode = invoice.getInvoiceCode();
         this.deliveryDate = invoice.getDeliveryDate();
-        this.meridiem = invoice.isMeridien();
+        this.meridiem = invoice.isMeridiem();
         this.storeAddress = invoice.getStoreAddress();
         this.storeLocalCode = invoice.getStoreLocalCode();
         this.customerAddress = invoice.getCustomerAddress();

@@ -27,7 +27,7 @@ public class Invoice {
 
     private LocalDate deliveryDate;
 
-    private boolean meridien;
+    private boolean meridiem;
 
     @Embedded
     @AttributeOverrides({
@@ -73,8 +73,8 @@ public class Invoice {
         this.orderStatus = orderStatus;
     }
 
-    public void setMeridien(boolean meridien) {
-        this.meridien = meridien;
+    public void setMeridiem(boolean meridiem) {
+        this.meridiem = meridiem;
     }
 
     public void setStoreAddress(Address storeAddress) {

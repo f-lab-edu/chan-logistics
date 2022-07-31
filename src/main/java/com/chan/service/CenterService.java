@@ -33,7 +33,6 @@ public class CenterService {
         }
 
         return center;
-
     }
 
     private void checkCenter(Center center){

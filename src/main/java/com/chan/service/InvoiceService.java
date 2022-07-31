@@ -13,8 +13,10 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +28,13 @@ public class InvoiceService {
     private final CenterService centerService;
 
     private final SigunguCode sigunguCode;
+
+    public List<Invoice> findInvoice(String localCode, LocalDate date, boolean meridiem){
+
+        Center center = centerService.findCenter(localCode);
+
+        return invoiceRepository.findAllByCenterAndOrderStatusAndDeliveryDateAndMeridiem(center, OrderStatus.RECEPTION, date, meridiem);
+    }
 
     @Transactional
     public Invoice requestInvoice(InvoiceRequestDto invoiceDto){
@@ -48,7 +57,7 @@ public class InvoiceService {
         invoice.setOrderId(invoiceDto.getOrderId());
         invoice.setInvoiceCode(makeUniqueString());
         invoice.setCenter(center);
-        invoice.setMeridien(invoiceDto.isMeridiem());
+        invoice.setMeridiem(invoiceDto.isMeridiem());
         invoice.setDeliveryDate(invoiceDto.getDeliveryDate());
         invoice.setStoreAddress(invoiceDto.getStoreAddress());
         invoice.setCustomerAddress(invoiceDto.getCustomerAddress());
