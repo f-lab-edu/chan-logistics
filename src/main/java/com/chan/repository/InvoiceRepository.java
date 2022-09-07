@@ -11,4 +11,5 @@ import java.util.List;
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
     List<Invoice> findAllByCenterAndOrderStatusAndDeliveryDateAndMeridiem(Center center, OrderStatus orderStatus, LocalDate deliveryDate, boolean meridiem);
+    Invoice findByIdAndOrderStatus(Long id,OrderStatus status);
 }

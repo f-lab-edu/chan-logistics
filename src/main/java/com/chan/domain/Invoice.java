@@ -52,6 +52,8 @@ public class Invoice {
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
+    private Long riderId;
+
     public void setOrderId(Long orderId) {
         this.orderId = orderId;
     }
@@ -91,5 +93,13 @@ public class Invoice {
 
     public void setCustomerLocalCode(String customerLocalCode) {
         this.customerLocalCode = customerLocalCode;
+    }
+
+    public void setMatchingCompletedTime(LocalDateTime matchingCompletedTime) {
+        this.matchingCompletedTime = matchingCompletedTime;
+    }
+
+    public void setRiderId(Long riderId) {
+        this.riderId = riderId;
     }
 }

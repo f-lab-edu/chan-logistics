@@ -1,5 +1,6 @@
 package com.chan.dto;
 
+import com.chan.domain.OrderStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,6 +17,9 @@ public class InvoiceFindRequestDto {
 
     @NotNull
     LocalDate date;
+
+    @NotNull
+    OrderStatus status;
 
     @NotNull
     boolean meridiem;

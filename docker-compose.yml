@@ -23,9 +23,10 @@ services:
       ENDPOINT_SELLER: "localhost:7070"
       ENDPOINT_CUSTOMER: "localhost:8080"
       ENDPOINT_LOGISTICS: "localhost:9090"
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresdb:5434/springboot
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresdb:5432/springboot
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: 1234
+      LOGISTICS_SQS_NAME: logistics_matching
     links:
       - postgresdb
 volumes:

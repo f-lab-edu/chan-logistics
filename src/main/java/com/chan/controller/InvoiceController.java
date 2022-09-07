@@ -4,6 +4,7 @@ import com.chan.common.Message;
 import com.chan.common.StatusEnum;
 import com.chan.domain.Invoice;
 import com.chan.dto.InvoiceFindRequestDto;
+import com.chan.dto.InvoiceMatchingRequestDto;
 import com.chan.dto.InvoiceRequestDto;
 import com.chan.dto.InvoiceResponseDto;
 import com.chan.exception.InvoiceRequestValidationFailedException;
@@ -11,6 +12,7 @@ import com.chan.service.InvoiceService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
@@ -35,10 +37,10 @@ public class InvoiceController {
             throw new InvoiceRequestValidationFailedException(objectMapper.writeValueAsString(errors));
         }
 
-        List<Invoice> invoiceList = invoiceService.findInvoice(invoiceFindRequestDto.getLocalCode(), invoiceFindRequestDto.getDate(), invoiceFindRequestDto.isMeridiem());
+        List<Invoice> invoiceList = invoiceService.findInvoice(invoiceFindRequestDto.getLocalCode(), invoiceFindRequestDto.getDate(), invoiceFindRequestDto.getStatus(),invoiceFindRequestDto.isMeridiem());
 
         message.setStatus(StatusEnum.OK);
-        message.setMessage("송장 추가 성공");
+        message.setMessage("송장 조회 성공");
         message.setData(invoiceList.stream().map(InvoiceResponseDto::new));
 
         return ResponseEntity.ok().body(message);

@@ -1,5 +1,9 @@
 package com.chan.controller;
 
+import com.chan.common.Message;
+import com.chan.common.StatusEnum;
+import com.chan.dto.InvoiceResponseDto;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -9,9 +13,9 @@ import java.util.HashMap;
 public class HealthCheckController {
 
     @GetMapping("/")
-    public Object Hi(){
-        HashMap<String, String> result = new HashMap<>();
-        result.put("data", "health check");
-        return result;
+    public ResponseEntity<Message> Hi(){
+        Message message = new Message();
+        message.setStatus(StatusEnum.OK);
+        return ResponseEntity.ok().body(message);
     }
 }

@@ -5,11 +5,13 @@ import com.chan.common.StatusEnum;
 import com.chan.exception.CenterFindFailedException;
 import com.chan.exception.CenterValidationFailedException;
 import com.chan.exception.InvoiceRequestValidationFailedException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(CenterFindFailedException.class)
@@ -36,6 +38,7 @@ public class GlobalExceptionHandler {
         Message message = new Message();
         message.setStatus(StatusEnum.BAD_REQUEST);
         message.setMessage(messages);
+        log.error(messages);
         return ResponseEntity.badRequest().body(message);
     }
 
