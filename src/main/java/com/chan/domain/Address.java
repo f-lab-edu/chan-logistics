@@ -21,4 +21,12 @@ public class Address {
     //한국 행정 구역 코드
     @NotNull
     private int sigunguCode;
+
+    public void setDoroAddress(String doroAddress) {
+        this.doroAddress = doroAddress;
+    }
+
+    public void setSigunguCode(int sigunguCode) {
+        this.sigunguCode = sigunguCode;
+    }
 }

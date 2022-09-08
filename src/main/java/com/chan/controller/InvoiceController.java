@@ -4,15 +4,13 @@ import com.chan.common.Message;
 import com.chan.common.StatusEnum;
 import com.chan.domain.Invoice;
 import com.chan.dto.InvoiceFindRequestDto;
-import com.chan.dto.InvoiceMatchingRequestDto;
-import com.chan.dto.InvoiceRequestDto;
+import com.chan.dto.InvoiceAddRequestDto;
 import com.chan.dto.InvoiceResponseDto;
 import com.chan.exception.InvoiceRequestValidationFailedException;
 import com.chan.service.InvoiceService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
@@ -47,7 +45,7 @@ public class InvoiceController {
     }
 
     @PostMapping
-    public ResponseEntity<Message> requestInvoice(@RequestBody @Valid InvoiceRequestDto invoiceRequestDto, Errors errors) throws JsonProcessingException {
+    public ResponseEntity<Message> requestInvoice(@RequestBody @Valid InvoiceAddRequestDto invoiceRequestDto, Errors errors) throws JsonProcessingException {
 
         Message message = new Message();
 

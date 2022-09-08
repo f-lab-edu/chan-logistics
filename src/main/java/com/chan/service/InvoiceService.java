@@ -1,6 +1,7 @@
 package com.chan.service;
 
 import com.chan.client.RiderClient;
+import com.chan.common.Message;
 import com.chan.common.SigunguCode;
 import com.chan.domain.Address;
 import com.chan.domain.Center;
@@ -8,8 +9,11 @@ import com.chan.domain.Invoice;
 import com.chan.domain.OrderStatus;
 import com.chan.dto.*;
 import com.chan.exception.InvoiceFindFailedException;
+import com.chan.exception.InvoiceMatchingFailedException;
 import com.chan.exception.InvoiceRequestValidationFailedException;
 import com.chan.repository.InvoiceRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
@@ -20,7 +24,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -33,48 +36,24 @@ public class InvoiceService {
 
     private final SigunguCode sigunguCode;
 
-    //private final RiderClient riderClient;
+    private final RiderClient riderClient;
+
+    private final ObjectMapper objectMapper;
 
     @Transactional
-    public void matchingInvoice(String localCode, List<InvoiceResponseDto> invoiceList){
+    public void matchingInvoice(String localCode, boolean isPm , List<MatchingInvoice> invoiceList) throws JsonProcessingException {
 
         LocalDateTime nowTime = LocalDateTime.now();
 
-        //라이더 정보 조회
-        RiderResponseDto riderResponseDto = new RiderResponseDto();
-        riderResponseDto.setLocalCode(localCode);
-        riderResponseDto.setRiderId(1234L);
+        //라이더 정보 요청
+        RiderResponseDto riderResponseDto = getRider(localCode,nowTime.toLocalDate(),isPm);
 
         //송장 정보 업데이트
-        List<Invoice> invoiceStream = invoiceList.stream().map(invoiceRep -> {
+        updateInvoices(riderResponseDto.getId(), nowTime, invoiceList);
 
-            Invoice invoice = invoiceRepository
-            .findByIdAndOrderStatus(invoiceRep.getInvoiceId(), OrderStatus.RECEPTION);
-                if(invoice != null){
-                    invoice.setOrderStatus(OrderStatus.MATCHING);
-                    invoice.setMatchingCompletedTime(nowTime);
-                    invoice.setRiderId(riderResponseDto.getRiderId());
-                }
-                return invoice;
-            })
-            .filter( out -> out!=null)
-            .collect(Collectors.toList());
+        //배송기사 송장 정보 업데이트 요청
+        updateMatchingRider(riderResponseDto.getId(), nowTime.toLocalDate(), isPm, invoiceList);
 
-        if(invoiceStream.size() > 0){
-            invoiceRepository.saveAll(invoiceStream);
-        }
-
-        //배송기사 정보 update
-        //RiderMatchingDto riderMatchingDto = new RiderMatchingDto();
-        //riderClient.matchDelivery(riderMatchingDto);
-
-    }
-
-    public Invoice findInvoice(Long id){
-
-        Invoice invoice = invoiceRepository.findById(id).orElseThrow(InvoiceFindFailedException::new);
-
-        return invoice;
     }
 
     public List<Invoice> findInvoice(String localCode, LocalDate date,OrderStatus orderStatus ,boolean meridiem){
@@ -85,7 +64,7 @@ public class InvoiceService {
     }
 
     @Transactional
-    public Invoice requestInvoice(InvoiceRequestDto invoiceDto){
+    public Invoice requestInvoice(InvoiceAddRequestDto invoiceDto){
 
         //check delivery
         checkDelivery(invoiceDto.getStoreAddress(), invoiceDto.getStoreAddress());
@@ -116,6 +95,78 @@ public class InvoiceService {
         Invoice saveInvoice = invoiceRepository.save(invoice);
 
         return saveInvoice;
+    }
+
+    public List<Invoice> updateInvoices(Long riderId, LocalDateTime nowTime, List<MatchingInvoice> invoiceList){
+
+        List<Invoice> invoiceStream = invoiceList.stream().map(invoiceRep -> {
+
+                    Invoice invoice = invoiceRepository
+                        .findByIdAndOrderStatus(invoiceRep.getInvoiceId(), OrderStatus.RECEPTION);
+
+                    if(invoice != null){
+                        invoice.setOrderStatus(OrderStatus.MATCHING);
+                        invoice.setMatchingCompletedTime(nowTime);
+                        invoice.setRiderId(riderId);
+                    }
+                    return invoice;
+            })
+            .filter( out -> out!=null)
+            .collect(Collectors.toList());
+
+        if(invoiceStream.size() > 0){
+            return invoiceRepository.saveAll(invoiceStream);
+        }
+        else{
+            throw new InvoiceMatchingFailedException("invoice list의 크기가 0입니다.");
+        }
+
+    }
+
+    private RiderResponseDto updateMatchingRider(Long riderId, LocalDate date, boolean isPm, List<MatchingInvoice> matchingInvoiceList) throws JsonProcessingException {
+
+        RiderMatchingRequestDto riderMatchingRequestDto = new RiderMatchingRequestDto();
+        riderMatchingRequestDto.setRiderId(riderId);
+        riderMatchingRequestDto.setPM(isPm);
+        riderMatchingRequestDto.setDate(date);
+
+        //SQS에서 받아온 MatchingInvoice List를 Rider Service 요청에 받는 데이터 형태로 변경
+        riderMatchingRequestDto.setInvoices(
+                matchingInvoiceList.stream().map( responseInvoice ->{
+                    Invoice invoice = invoiceRepository.findById(responseInvoice.getInvoiceId()).orElseThrow(InvoiceMatchingFailedException::new);
+                    return new RiderMatchingInvoiceDto(invoice);
+                }).collect(Collectors.toList())
+        );
+
+        Message responseMessage = riderClient.matchDelivery(riderMatchingRequestDto);
+
+        if(responseMessage.isOk()){
+            RiderResponseDto riderResponseDto = objectMapper.readValue(responseMessage.getData().toString(), RiderResponseDto.class);
+            return riderResponseDto;
+        }
+        else{
+            throw new InvoiceMatchingFailedException("매칭 중 라이더 매칭이 실패하였습니다.");
+        }
+
+    }
+
+    private RiderResponseDto getRider(String localCode, LocalDate date, boolean isPm) throws JsonProcessingException {
+
+        RiderRequestDto riderRequestDto = new RiderRequestDto();
+        riderRequestDto.setDate(date);
+        riderRequestDto.setLocalCode(localCode);
+        riderRequestDto.setPm(isPm);
+
+        Message responseMessage = riderClient.getRider(riderRequestDto);
+
+        if(responseMessage.isOk()){
+            RiderResponseDto riderResponseDto = objectMapper.readValue(responseMessage.getData().toString(), RiderResponseDto.class);
+            return riderResponseDto;
+        }
+        else{
+            throw new InvoiceMatchingFailedException("매칭 중 라이더 요청이 실패하였습니다.");
+        }
+
     }
 
     private boolean checkDelivery(Address store, Address customer){

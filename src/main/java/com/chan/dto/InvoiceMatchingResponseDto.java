@@ -9,5 +9,7 @@ public class InvoiceMatchingResponseDto {
 
     String localCode;
 
-    List<InvoiceResponseDto> invoiceResponseDtoList;
+    boolean meridiem;
+
+    List<MatchingInvoice> invoiceResponseDtoList;
 }

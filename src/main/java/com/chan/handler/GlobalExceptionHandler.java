@@ -2,9 +2,7 @@ package com.chan.handler;
 
 import com.chan.common.Message;
 import com.chan.common.StatusEnum;
-import com.chan.exception.CenterFindFailedException;
-import com.chan.exception.CenterValidationFailedException;
-import com.chan.exception.InvoiceRequestValidationFailedException;
+import com.chan.exception.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,17 +13,27 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(CenterFindFailedException.class)
-    public ResponseEntity<Message> handleCustomerFindFailException(CenterFindFailedException ex){
+    public ResponseEntity<Message> handleException(CenterFindFailedException ex){
         return responseBadRequest(ex.getMessage());
     }
 
     @ExceptionHandler(CenterValidationFailedException.class)
-    public ResponseEntity<Message> handleCustomerFindFailException(CenterValidationFailedException ex){
+    public ResponseEntity<Message> handleException(CenterValidationFailedException ex){
         return responseBadRequest(ex.getMessage());
     }
 
     @ExceptionHandler(InvoiceRequestValidationFailedException.class)
-    public ResponseEntity<Message> handleCustomerFindFailException(InvoiceRequestValidationFailedException ex){
+    public ResponseEntity<Message> handleException(InvoiceRequestValidationFailedException ex){
+        return responseBadRequest(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvoiceFindFailedException.class)
+    public ResponseEntity<Message> handleException(InvoiceFindFailedException ex){
+        return responseBadRequest(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvoiceMatchingFailedException.class)
+    public ResponseEntity<Message> handleException(InvoiceMatchingFailedException ex){
         return responseBadRequest(ex.getMessage());
     }
 
