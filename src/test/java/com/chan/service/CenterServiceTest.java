@@ -1,7 +1,8 @@
 package com.chan.service;
 
+import com.chan.DatabaseTest;
 import com.chan.domain.Center;
-import com.chan.repository.CenterRepository;
+import com.chan.dto.CenterRequestDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,27 +10,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
-class CenterServiceTest {
+class CenterServiceTest extends DatabaseTest {
 
     @Autowired
     CenterService centerService;
 
-    @Autowired
-    CenterRepository centerRepository;
-
     @Test
-    public void centerAdd() throws Exception{
-        Center center = new Center("test 센터", "A01");
+    void addCenterAndFindCenter() {
 
-        Center center1 = centerService.addCenter(center);
-        Center findCenter = centerService.findCenter(center1.getLocalCode());
+        String localCode = "A01";
+        String centerName = "센터이름";
 
-        Assertions.assertEquals(center.getLocalCode(), findCenter.getLocalCode());
-        Assertions.assertEquals(center.getName(), findCenter.getName());
+        CenterRequestDto centerRequestDto = new CenterRequestDto();
 
+        centerRequestDto.setLocalCode(localCode);
+        centerRequestDto.setName(centerName);
+
+        centerService.addCenter(centerRequestDto.toEntity());
+
+        Center findCenter = centerService.findCenter(localCode);
+
+        Assertions.assertEquals(findCenter.getLocalCode(), localCode);
+        Assertions.assertEquals(findCenter.getName(), centerName);
     }
+
 }
